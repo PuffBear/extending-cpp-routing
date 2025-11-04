@@ -1,0 +1,4 @@
+algorithm,cost,time,nodes,edges
+Capacity_Heuristic,18227.07,0.0,37.72,147.36
+Classical_CPP,1314.027,0.0,37.72,147.36
+Greedy_k_CPP,538.907,0.0,37.72,147.36
