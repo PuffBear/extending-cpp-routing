@@ -91,12 +91,11 @@ class CPPLoadDependentCosts:
         
         elif self.cost_function_type == LoadCostFunction.FUEL_CONSUMPTION:
             # Realistic fuel consumption model
-            # Fuel ∝ weight, increases non-linearly with load
             def fuel_cost(base_cost, load):
-                empty_weight = 1.0
+                empty_weight = 50.0  # More realistic empty vehicle weight
                 vehicle_load = empty_weight + load
-                # Fuel consumption proportional to total weight
-                return base_cost * (vehicle_load / empty_weight) ** 1.2
+                # Fuel ∝ total weight, moderate non-linearity
+                return base_cost * (vehicle_load / empty_weight) ** 0.8
             self.cost_function = fuel_cost
     
     def check_capacity_feasibility(self) -> bool:

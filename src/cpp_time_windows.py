@@ -281,16 +281,6 @@ class CPPTimeWindowsSolver:
 
 def generate_cpp_tw_instance(G: nx.Graph, 
                              tightness: float = 1.0) -> Dict[Tuple, EdgeService]:
-    """
-    Generate CPP-TW instance from base graph
-    
-    Args:
-        G: Base graph
-        tightness: Time window tightness (0.5 = very tight, 2.0 = very loose)
-    
-    Returns:
-        Dictionary of edge services with time windows
-    """
     edge_services = {}
     
     # Estimate minimum tour time
@@ -306,13 +296,13 @@ def generate_cpp_tw_instance(G: nx.Graph,
         # Service duration
         service_duration = np.random.uniform(5, 15)
         
-        # Time window centered around expected arrival
+        # Time window - FIXED: More generous windows
         expected_arrival = current_time
-        window_size = service_duration * tightness * 5
+        window_size = service_duration * tightness * 10  # Was 5, now 10
         
         time_window = TimeWindow(
-            early=max(0, expected_arrival - window_size/2),
-            late=expected_arrival + window_size/2
+            early=max(0, expected_arrival - window_size),  # Allow earlier arrival
+            late=expected_arrival + window_size * 2  # Much later deadline
         )
         
         edge_services[edge] = EdgeService(
@@ -323,7 +313,7 @@ def generate_cpp_tw_instance(G: nx.Graph,
             waiting_penalty=1.0
         )
         
-        current_time += service_duration
+        current_time += service_duration + data.get('weight', 5.0) * 0.5  # Add travel time estimate
     
     return edge_services
 
