@@ -281,28 +281,43 @@ class CPPTimeWindowsSolver:
 
 def generate_cpp_tw_instance(G: nx.Graph, 
                              tightness: float = 1.0) -> Dict[Tuple, EdgeService]:
+    """
+    Generate CPP-TW instance from base graph
+    
+    Args:
+        G: Base graph
+        tightness: Time window tightness (0.5 = tight, 2.0 = loose)
+    
+    Returns:
+        Dictionary of edge services with time windows
+    """
     edge_services = {}
     
-    # Estimate minimum tour time
-    total_edges = G.number_of_edges()
-    avg_service = 10.0
-    min_tour_time = total_edges * avg_service
+    # Estimate realistic tour time
+    edges = list(G.edges())
+    total_edges = len(edges)
     
-    current_time = 0.0
+    # Start with reasonable time budget
+    current_earliest = 0.0
+    time_increment = 15.0  # Time budget per edge
     
     for i, (u, v, data) in enumerate(G.edges(data=True)):
         edge = (u, v)
         
         # Service duration
-        service_duration = np.random.uniform(5, 15)
+        service_duration = np.random.uniform(8, 12)
         
-        # Time window - FIXED: More generous windows
-        expected_arrival = current_time
-        window_size = service_duration * tightness * 10  # Was 5, now 10
+        # Progressive time windows (get more generous over time)
+        center_time = current_earliest + (i * time_increment)
+        
+        # Window size scales with tightness and position in tour
+        base_window = service_duration * 5 * tightness
+        position_factor = 1.0 + (i / total_edges) * 2  # Later edges get wider windows
+        window_size = base_window * position_factor
         
         time_window = TimeWindow(
-            early=max(0, expected_arrival - window_size),  # Allow earlier arrival
-            late=expected_arrival + window_size * 2  # Much later deadline
+            early=max(0, center_time - window_size * 0.5),
+            late=center_time + window_size * 1.5  # Asymmetric: easier to be late
         )
         
         edge_services[edge] = EdgeService(
@@ -310,10 +325,11 @@ def generate_cpp_tw_instance(G: nx.Graph,
             time_window=time_window,
             service_duration=service_duration,
             travel_cost=data.get('weight', 1.0),
-            waiting_penalty=1.0
+            waiting_penalty=0.5  # Lower penalty encourages waiting
         )
         
-        current_time += service_duration + data.get('weight', 5.0) * 0.5  # Add travel time estimate
+        # Advance time
+        current_earliest = center_time + service_duration
     
     return edge_services
 

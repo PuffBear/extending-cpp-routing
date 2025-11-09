@@ -482,6 +482,133 @@ Method & Avg Gap & Performance \\\\
 """
         return latex
     
+    def generate_visualizations(self):
+        """Generate all figures for paper"""
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+        
+        print("\n" + "="*70)
+        print("Generating Figures")
+        print("="*70)
+        
+        # Figure 1: Cost distribution by variant
+        if self.results['classical'] and self.results['cpp_lc']:
+            df_classical = pd.DataFrame(self.results['classical'])
+            df_lc = pd.DataFrame(self.results['cpp_lc'])
+            
+            plt.figure(figsize=(12, 6))
+            
+            # Classical costs
+            plt.subplot(1, 2, 1)
+            plt.hist(df_classical['cost'], bins=20, alpha=0.7, color='blue', edgecolor='black')
+            plt.xlabel('Cost')
+            plt.ylabel('Frequency')
+            plt.title('Classical CPP Cost Distribution')
+            plt.grid(True, alpha=0.3)
+            
+            # CPP-LC increase
+            plt.subplot(1, 2, 2)
+            for cost_func in df_lc['cost_function'].unique():
+                data = df_lc[df_lc['cost_function'] == cost_func]['increase_percent']
+                plt.hist(data, bins=10, alpha=0.5, label=cost_func)
+            
+            plt.xlabel('Cost Increase (%)')
+            plt.ylabel('Frequency')
+            plt.title('CPP-LC Cost Increase vs Classical')
+            plt.legend()
+            plt.grid(True, alpha=0.3)
+            
+            plt.tight_layout()
+            plt.savefig(f'{self.output_dir}/figures/cost_distributions.pdf', dpi=300)
+            plt.savefig(f'{self.output_dir}/figures/cost_distributions.png', dpi=300)
+            plt.close()
+            print("✓ Figure 1 (Cost distributions) generated")
+        
+        # Figure 2: Scalability
+        if self.results['classical']:
+            df = pd.DataFrame(self.results['classical'])
+            
+            plt.figure(figsize=(10, 6))
+            
+            # Extract size from instance name
+            df['size'] = df['instance'].str.extract(r'(small|medium|large)')[0]
+            size_order = ['small', 'medium', 'large']
+            
+            colors = {'small': 'green', 'medium': 'orange', 'large': 'red'}
+            
+            for size in size_order:
+                size_data = df[df['size'] == size]
+                if not size_data.empty:
+                    plt.scatter(size_data['nodes'], size_data['cost'], 
+                            label=size, alpha=0.6, s=100, color=colors[size])
+            
+            plt.xlabel('Number of Nodes')
+            plt.ylabel('Solution Cost')
+            plt.title('Scalability: Cost vs Graph Size')
+            plt.legend()
+            plt.grid(True, alpha=0.3)
+            plt.tight_layout()
+            plt.savefig(f'{self.output_dir}/figures/scalability.pdf', dpi=300)
+            plt.savefig(f'{self.output_dir}/figures/scalability.png', dpi=300)
+            plt.close()
+            print("✓ Figure 2 (Scalability) generated")
+        
+        # Figure 3: Learning gap analysis
+        if self.results['learning']:
+            df = pd.DataFrame(self.results['learning'])
+            
+            plt.figure(figsize=(10, 6))
+            
+            instances = df['instance'].values
+            gaps = df['gap_percent'].values
+            
+            colors = ['green' if g < 10 else 'orange' if g < 20 else 'red' for g in gaps]
+            
+            plt.barh(range(len(instances)), gaps, color=colors, alpha=0.7)
+            plt.yticks(range(len(instances)), instances, fontsize=8)
+            plt.xlabel('Optimality Gap (%)')
+            plt.title('Learning-Augmented Framework: Gap from Optimal')
+            plt.axvline(x=0, color='black', linestyle='-', linewidth=0.5)
+            plt.axvline(x=10, color='green', linestyle='--', alpha=0.5, label='<10% (excellent)')
+            plt.axvline(x=20, color='orange', linestyle='--', alpha=0.5, label='10-20% (good)')
+            plt.legend()
+            plt.grid(True, alpha=0.3, axis='x')
+            plt.tight_layout()
+            plt.savefig(f'{self.output_dir}/figures/learning_gaps.pdf', dpi=300)
+            plt.savefig(f'{self.output_dir}/figures/learning_gaps.png', dpi=300)
+            plt.close()
+            print("✓ Figure 3 (Learning gaps) generated")
+        
+        # Figure 4: CPP-LC detailed comparison
+        if self.results['cpp_lc']:
+            df = pd.DataFrame(self.results['cpp_lc'])
+            
+            plt.figure(figsize=(12, 6))
+            
+            cost_funcs = df['cost_function'].unique()
+            x = np.arange(len(cost_funcs))
+            width = 0.35
+            
+            means = [df[df['cost_function'] == cf]['increase_percent'].mean() for cf in cost_funcs]
+            stds = [df[df['cost_function'] == cf]['increase_percent'].std() for cf in cost_funcs]
+            
+            plt.bar(x, means, width, yerr=stds, capsize=5, alpha=0.7, color=['blue', 'orange', 'green'])
+            plt.xlabel('Cost Function')
+            plt.ylabel('Average Cost Increase (%)')
+            plt.title('CPP-LC Performance by Cost Function')
+            plt.xticks(x, cost_funcs)
+            plt.grid(True, alpha=0.3, axis='y')
+            
+            # Add value labels on bars
+            for i, (m, s) in enumerate(zip(means, stds)):
+                plt.text(i, m + s + 10, f'{m:.1f}%', ha='center', fontweight='bold')
+            
+            plt.tight_layout()
+            plt.savefig(f'{self.output_dir}/figures/cpp_lc_comparison.pdf', dpi=300)
+            plt.savefig(f'{self.output_dir}/figures/cpp_lc_comparison.png', dpi=300)
+            plt.close()
+            print("✓ Figure 4 (CPP-LC comparison) generated")
+
     def generate_final_report(self):
         """
         Generate comprehensive final report
@@ -533,6 +660,7 @@ def main():
     pipeline.run_phase5_learning_augmented(instances)
     
     # Generate deliverables
+    pipeline.generate_visualizations()
     pipeline.generate_paper_tables()
     pipeline.generate_final_report()
     
