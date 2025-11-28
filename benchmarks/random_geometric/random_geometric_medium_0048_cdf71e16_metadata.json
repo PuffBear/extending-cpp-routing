@@ -1,0 +1,32 @@
+{
+  "instance_id": "random_geometric_medium_0048_cdf71e16",
+  "network_family": "random_geometric",
+  "size": "medium",
+  "num_nodes": 100,
+  "num_edges": 409,
+  "density": 0.08262626262626263,
+  "avg_degree": 8.18,
+  "clustering_coeff": 0.6270245865245865,
+  "diameter": 10,
+  "is_connected": true,
+  "generation_timestamp": "2025-11-28T23:41:45.751379",
+  "random_seed": 48,
+  "parameters": {
+    "cpp_lc": {
+      "total_demand": 5106.353916847933,
+      "capacity": 2042.5415667391733,
+      "capacity_ratio": 0.4
+    },
+    "cpp_tw": {
+      "tightness": 1.0,
+      "num_windows": 409
+    },
+    "mixed_cpp": {
+      "directed_fraction": 0.4,
+      "num_directed": 180
+    },
+    "windy": {
+      "asymmetry_factor": 0.6
+    }
+  }
+}

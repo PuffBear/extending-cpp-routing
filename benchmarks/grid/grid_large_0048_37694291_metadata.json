@@ -1,0 +1,32 @@
+{
+  "instance_id": "grid_large_0048_37694291",
+  "network_family": "grid",
+  "size": "large",
+  "num_nodes": 400,
+  "num_edges": 760,
+  "density": 0.009523809523809525,
+  "avg_degree": 3.8,
+  "clustering_coeff": 0.0,
+  "diameter": 38,
+  "is_connected": true,
+  "generation_timestamp": "2025-11-28T23:41:45.309393",
+  "random_seed": 48,
+  "parameters": {
+    "cpp_lc": {
+      "total_demand": 9430.137318200921,
+      "capacity": 3772.0549272803687,
+      "capacity_ratio": 0.4
+    },
+    "cpp_tw": {
+      "tightness": 1.0,
+      "num_windows": 760
+    },
+    "mixed_cpp": {
+      "directed_fraction": 0.4,
+      "num_directed": 327
+    },
+    "windy": {
+      "asymmetry_factor": 0.6
+    }
+  }
+}
