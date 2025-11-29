@@ -1,0 +1,11 @@
+{
+  "instance_id": "osm_london_sample",
+  "network_family": "osm_real",
+  "location": "London (sampled 150 nodes from Westminster)",
+  "num_nodes": 150,
+  "num_edges": 154,
+  "source": "OpenStreetMap (Geofabrik PBF)",
+  "source_file": "data/greater-london-251127.osm.pbf",
+  "extraction_method": "Random BFS sampling",
+  "extraction_date": "2025-11-29T04:09:41.947210"
+}

@@ -1,0 +1,5 @@
+,cost,cost,cost,cost,cost,runtime_seconds,runtime_seconds,gap_from_classical,gap_from_classical
+,count,mean,std,min,max,mean,max,mean,std
+algorithm,,,,,,,,,
+classical_cpp,60,4589.819,3596.147,383.626,10606.582,0.326,1.7,0.0,0.0
+greedy,60,4945.239,4066.282,356.762,12747.112,0.014,0.06,4.221,9.938

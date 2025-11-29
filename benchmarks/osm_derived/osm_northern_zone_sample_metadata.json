@@ -1,0 +1,10 @@
+{
+  "instance_id": "osm_northern_zone_sample",
+  "network_family": "osm_real",
+  "location": "Northern Zone, London (OSMnx 2km radius)",
+  "num_nodes": 1922,
+  "num_edges": 2487,
+  "source": "OpenStreetMap via OSMnx",
+  "extraction_method": "OSMnx point query (2km radius)",
+  "extraction_date": "2025-11-29T06:16:38.994978"
+}

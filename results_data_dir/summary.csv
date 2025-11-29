@@ -1,0 +1,6 @@
+,cost,cost,cost,gap_from_classical,gap_from_classical
+,count,mean,std,mean,std
+algorithm,,,,,
+classical_cpp,25,2107.595,2493.768,0.0,0.0
+cpp_lc_fast,25,747.303,865.74,-63.712,2.984
+greedy,25,2923.574,2178.895,125.537,113.779

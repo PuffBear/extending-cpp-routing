@@ -1,0 +1,12 @@
+{
+  "instance_id": "synthetic_urban_200",
+  "network_family": "synthetic_real_world",
+  "description": "Synthetic urban-like network (200 nodes)",
+  "num_nodes": 200,
+  "num_edges": 815,
+  "avg_degree": 8.15,
+  "clustering_coefficient": 0.30454447431653314,
+  "source": "Generated synthetic network with real-world properties",
+  "generation_method": "Spatial + scale-free hybrid",
+  "generation_date": "2025-11-29T05:05:11.929478"
+}

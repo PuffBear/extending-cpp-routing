@@ -12,71 +12,116 @@ from cpp_solver import CPPSolver
 from cpp_load_dependent import CPPLoadDependentCosts, LoadCostFunction
 
 
-def solve_classical_cpp(G: nx.Graph) -> Tuple[float, List]:
+def solve_classical_cpp(G: nx.Graph, timeout_seconds: int = 600) -> Dict:
     """
-    Solve classical CPP using existing CPPSolver
+    Solve classical CPP using FIXED solver with proper matching
     
     Args:
         G: NetworkX graph
+        timeout_seconds: Maximum time allowed (default 10 minutes)
         
     Returns:
-        (cost, tour) tuple
+        Dictionary with:
+        - 'cost': float (total tour cost)
+        - 'tour': list (edge sequence)  
+        - 'computation_time': float (seconds)
+        - 'approximation_mode': bool (False if exact, True if timeout/failed)
+        - Other metadata fields
     """
-    solver = CPPSolver()
-    cost, tour, _ = solver.solve_classical_cpp(G)
-    return cost, tour
+    # Import the fixed solver
+    from cpp_solver_fixed import solve_classical_cpp_fixed
+    
+    result = solve_classical_cpp_fixed(G, timeout_seconds=timeout_seconds)
+    return result
 
 
 def solve_greedy_heuristic(G: nx.Graph) -> Tuple[float, List]:
     """
     Simple greedy heuristic for CPP
-    
+
     Args:
         G: NetworkX graph
-        
+
     Returns:
         (cost, tour) tuple
     """
-    # Greedy: build tour by always taking shortest available edge
-    tour = []
+    # Greedy: pick nearest unvisited edge at each step
+    tour = [0]  # Start at depot
     current_node = 0
-    unvisited_edges = set(G.edges())
+    visited_edges = set()
     total_cost = 0
-    
-    # Cover all edges
-    required_edges = list(G.edges())
-    
-    # Build tour greedily
-    for edge in required_edges:
-        u, v = edge
-        
-        # Get to edge start
-        if tour:
-            last_node = tour[-1]
-            if last_node != u:
-                try:
-                    path = nx.shortest_path(G, last_node, u, weight='weight')
-                    tour.extend(path[:-1])  # Don't duplicate u
-                    for i in range(len(path) - 1):
-                        total_cost += G[path[i]][path[i+1]].get('weight', 1.0)
-                except:
-                    total_cost += 1000  # Penalty
-        
-        # Traverse edge
-        tour.append(u)
-        tour.append(v)
-        total_cost += G[u][v].get('weight', 1.0)
-    
-    # Return to start
-    if tour and tour[-1] != 0:
+
+    # Track all edges (both directions)
+    all_edges = set()
+    for u, v in G.edges():
+        all_edges.add((u, v))
+        all_edges.add((v, u))
+
+    # While there are unvisited edges
+    while len(visited_edges) < len(all_edges):
+        # Find nearest unvisited edge from current position
+        best_edge = None
+        best_cost = float('inf')
+        best_path = None
+
+        for u, v in all_edges:
+            if (u, v) in visited_edges or (v, u) in visited_edges:
+                continue
+
+            # Cost to reach this edge from current position
+            try:
+                if current_node == u:
+                    # Already at edge start
+                    cost = G[u][v].get('weight', 1.0)
+                    path = [u, v]
+                elif current_node == v:
+                    # At edge end, traverse backwards
+                    cost = G[v][u].get('weight', 1.0) if G.has_edge(v, u) else G[u][v].get('weight', 1.0)
+                    path = [v, u]
+                else:
+                    # Need to travel to edge
+                    travel = nx.shortest_path_length(G, current_node, u, weight='weight')
+                    edge_cost = G[u][v].get('weight', 1.0)
+                    cost = travel + edge_cost
+                    path = nx.shortest_path(G, current_node, u, weight='weight') + [v]
+
+                if cost < best_cost:
+                    best_cost = cost
+                    best_edge = (u, v)
+                    best_path = path
+            except nx.NetworkXNoPath:
+                continue
+
+        if best_edge is None:
+            break  # No more reachable edges
+
+        # Add path to tour and cost
+        if best_path:
+            # Add travel cost
+            for i in range(len(best_path) - 1):
+                u, v = best_path[i], best_path[i+1]
+                if G.has_edge(u, v):
+                    total_cost += G[u][v].get('weight', 1.0)
+                elif G.has_edge(v, u):
+                    total_cost += G[v][u].get('weight', 1.0)
+
+            tour.extend(best_path[1:])  # Don't duplicate current node
+            current_node = best_path[-1]
+
+        # Mark edge as visited (both directions)
+        visited_edges.add(best_edge)
+        visited_edges.add((best_edge[1], best_edge[0]))
+
+    # Return to depot
+    if current_node != 0:
         try:
-            path = nx.shortest_path(G, tour[-1], 0, weight='weight')
+            path = nx.shortest_path(G, current_node, 0, weight='weight')
             tour.extend(path[1:])
             for i in range(len(path) - 1):
                 total_cost += G[path[i]][path[i+1]].get('weight', 1.0)
         except:
-            total_cost += 1000
-    
+            pass
+
     return total_cost, tour
 
 
@@ -193,9 +238,10 @@ if __name__ == "__main__":
     G.add_edge(2, 3, weight=2.0)
     G.add_edge(3, 0, weight=1.2)
     
-    print("\n1. Classical CPP:")
-    cost, tour = solve_classical_cpp(G)
-    print(f"   Cost: {cost:.2f}, Tour length: {len(tour)}")
+    print("\n1. Classical CPP (Fixed):")
+    result = solve_classical_cpp(G)
+    print(f"   Cost: {result['cost']:.2f}, Tour length: {len(result['tour'])}")
+    print(f"   Approximation mode: {result['approximation_mode']}")
     
     print("\n2. Greedy Heuristic:")
     cost, tour = solve_greedy_heuristic(G)
@@ -206,3 +252,4 @@ if __name__ == "__main__":
     print(f"   Cost: {cost:.2f}, Tour length: {len(tour)}")
     
     print("\n✅ All adapter functions working!")
+

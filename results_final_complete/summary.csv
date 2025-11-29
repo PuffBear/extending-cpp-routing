@@ -1,0 +1,6 @@
+,cost,cost,cost,gap_from_classical,gap_from_classical
+,count,mean,std,mean,std
+algorithm,,,,,
+classical_cpp,29,1040.123,1180.066,0.0,0.0
+greedy,29,1105.347,1202.655,11.664,9.755
+ml_improved,29,815.773,739.656,-2.318,52.362

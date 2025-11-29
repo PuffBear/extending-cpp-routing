@@ -1,0 +1,12 @@
+{
+  "instance_id": "synthetic_highway_100",
+  "network_family": "synthetic_real_world",
+  "description": "Synthetic highway-like network (100 nodes)",
+  "num_nodes": 100,
+  "num_edges": 246,
+  "avg_degree": 4.92,
+  "clustering_coefficient": 0.2946255411255411,
+  "source": "Generated synthetic network with real-world properties",
+  "generation_method": "Spatial + scale-free hybrid",
+  "generation_date": "2025-11-29T05:05:11.954261"
+}

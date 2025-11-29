@@ -19,6 +19,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 from benchmark_generator import BenchmarkGenerator, CPPInstance
+from cpp_load_dependent import LoadCostFunction
 
 
 @dataclass
